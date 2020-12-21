@@ -3,8 +3,23 @@ const path = require('path');
 const router = express.Router();
 const rootDir = require('../util/path');
 const adminData = require('./admin');
-const productController = require ('../controllers/products.js');
+const shopController = require ('../controllers/shop');
 
-router.get('/', productController.getProducts);
+router.get('/', shopController.getIndex);
 
-module.exports = router;
+router.get('/products', shopController.getProducts);
+
+router.get('/products/:productId', shopController.getProduct);
+
+router.get('/cart', shopController.getCart);
+
+router.post('/cart', shopController.postCart);
+
+router.post('/cart-delete-item', shopController.postCartDeleteProduct);
+
+router.get('/orders', shopController.getOrders);
+
+router.get('/checkout', shopController.getCheckOut);
+
+module.exports = router; 
+
