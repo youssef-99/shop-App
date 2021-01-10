@@ -14,9 +14,14 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-    const product = new Product(null, title, imageUrl, price, description);
-    product.save().then(() => {
+    req.user.createProduct({
+        title: title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description
+    }).then(result => {
         res.redirect('/');
+        console.log(result);
     }).catch(err => {
         console.log(err);
     });
@@ -28,47 +33,67 @@ exports.getEditProduct = (req, res, next) => {
         return res.render('/');
     }
     const prodId = req.params.productId;
-    Product.findById(prodId, product => {
-        if (!product) {
-            return res.render('/');
+    req.user.getProducts({ where: { id: prodId } }).then(
+        products => {
+            const product = products[0];
+            if (!product) {
+                return res.render('/');
+            }
+            res.render('admin/edit-product',
+                {
+                    path: '/admin/edit-product',
+                    title: 'Edit Product',
+                    editing: editMode,
+                    product: product
+                });
         }
-        res.render('admin/edit-product',
-            {
-                path: '/admin/edit-product',
-                title: 'Edit Product',
-                editing: editMode,
-                product: product
-            });
+    ).catch(err => {
+        console.log(err);
     });
 }
 
 exports.getProducts = (req, res, next) => {
-    Product.fetchAll(products => {
-        res.render('admin/products', {
-            prods: products,
-            title: 'Admin Product',
-            path: '/admin/products'
-        })
+    Product.findAll().then(
+        products => {
+            res.render('admin/products', {
+                prods: products,
+                title: 'Admin Product',
+                path: '/admin/products'
+            })
+        }
+    ).catch(err => {
+        console.log(err);
     });
 }
 
 exports.postEditProduct = (req, res, next) => {
-    console.log(req.body.productId);
-    const updatedProduct = new Product(
-        req.body.productId,
-        req.body.title,
-        req.body.imageUrl,
-        req.body.price,
-        req.body.description
-    );
-    updatedProduct.save();
-    res.redirect('/admin/products');
+    Product.findByPk(req.body.productId).then(product => {
+        product.title = req.body.title,
+            product.imageUrl = req.body.imageUrl,
+            product.price = req.body.price,
+            product.description = req.body.description
+        return product.save();
+    }).then(result => {
+        console.log('UPDATED');
+        res.redirect('/admin/products');
+    })
+        .catch(err => {
+            console.log(err);
+        });
 }
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    console.log(prodId);
-    Product.deleteById(prodId);
-    res.redirect('/admin/products');
+    Product.findByPk(prodId).
+        then(product => {
+            return product.destroy();
+        }).
+        then(result => {
+            console.log('DESTROED!');
+            res.redirect('/admin/products');
+        }).
+        catch(err => {
+            console.log(err);
+        });
 }
 
