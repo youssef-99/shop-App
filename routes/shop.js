@@ -1,9 +1,9 @@
-const express = require ('express');
+const express = require('express');
 const path = require('path');
 const router = express.Router();
 const rootDir = require('../util/path');
 const adminData = require('./admin');
-const shopController = require ('../controllers/shop');
+const shopController = require('../controllers/shop');
 
 router.get('/', shopController.getIndex);
 
@@ -17,9 +17,9 @@ router.post('/cart', shopController.postCart);
 
 router.post('/cart-delete-item', shopController.postCartDeleteProduct);
 
-router.get('/orders', shopController.getOrders);
+// router.get('/orders', shopController.getOrders);
 
-router.get('/checkout', shopController.getCheckOut);
+// router.get('/checkout', shopController.getCheckOut);
 
-module.exports = router; 
+module.exports = router;
 
